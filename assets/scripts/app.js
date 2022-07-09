@@ -10,54 +10,56 @@ class Product {
         this.imageUrl = imageUrl;
         this.description = description;
         this.price = price;
-    };
-
-    some () {
-        console.log(hello);
     }
-}
 
-//class 
+};
 
-console.log(new Product);
+class ProductItem {
+    constructor(product)
+    {
+        this.product = product;
+    }
 
-const productList = {
-    products : [
+    render(){
+        const prodEl = document.createElement('li');
+            prodEl.className = 'product-item';
+            prodEl.innerHTML = `
+            <div>
+                <img src = "${this.product.imageUrl}" alt = "${this.product.title}">
+                <div class="product-item__content">
+                    <h2>${this.product.title}</h2>
+                    <h3>\$${this.product.price}</h3>
+                    <p>${this.product.description}</p>
+                    <button> Add to cart </button>
+                </div>
+            </div>
+            `;
+            return prodEl;
+    }
+};
+
+class ProductList {
+    products = [
         new Product('A Pillow','https://nymag.com/strategist/article/best-throw-pillows.html','A soft pillow', 2.33),
         new Product('A Carpet', 'https://www.thespruce.com/overview-of-carpet-choices-1315092','A good quality carpet', 5.33)
-    ],
+    ];
 
-    
+    constructor(){ }
 
-    render : function ()  {
-
-        console.log(this);
-        console.log(this.products[0]);
-        console.log(this.products[1]);
+    render() {
         const renderHook = document.getElementById('app');
         const prodList = document.createElement('ul');
         prodList.className = 'product-list';
 
         for(const prod of this.products)
         {
-            const prodEl = document.createElement('li');
-            prodEl.className = 'product-item';
-            prodEl.innerHTML = `
-            <div>
-                <img src = "${prod.imageUrl}" alt = "${prod.title}">
-                <div class="product-item__content">
-                    <h2>${prod.title}</h2>
-                    <h3>\$${prod.price}</h3>
-                    <p>${prod.description}</p>
-                    <button> Add to cart </button>
-                </div>
-            </div>
-            `;
+            const productItem = new ProductItem(prod);
+            const prodEl = productItem.render();
             prodList.append(prodEl);
         }
         renderHook.append(prodList);
     }
+} 
 
-};
-
+const productList = new ProductList();
 productList.render();
