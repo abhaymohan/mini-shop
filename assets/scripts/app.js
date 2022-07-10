@@ -14,33 +14,108 @@ class Product {
 
 };
 
-class ShoppingCart{
+class ElementAttribute {
+    constructor(attrName,attrValue)
+    {
+        this.name = attrName;
+        this.value = attrValue;
+    }
+}
+
+class Component {
+
+    constructor(renderHookId,shouldRender = true){
+        this.hookId = renderHookId;
+        if(shouldRender)
+        {
+            this.render();
+        }
+        
+    }
+
+    render(){};
+
+    createRootElement(tag, cssClasses, attributes)
+    {
+        const rootElement = document.createElement(tag);
+        if(cssClasses)
+        {
+            rootElement.className = cssClasses;
+        }
+        if(attributes && attributes.length > 0)
+        {
+            for(const attr of attributes)
+            {
+                rootElement.setAttribute(attr.name, attr.value);
+            }
+
+        }
+
+        document.getElementById(this.hookId).append(rootElement);
+
+        return rootElement;
+    }
+}
+
+class ShoppingCart extends Component{
 
     items = [];
 
-    addProduct(product)
-    {
-        this.items.push(product);
-        this.totalOutput.innerHTML = ` <h2>Total : \$${1}</h2>`
+    get totalAmount(){
+        const sum = this.items.reduce((prevValue, curItem) => {
+            return prevValue + curItem.price;
+        },0);
+
+        return sum;
     }
 
+    set cartItems(value){
+        this.items = value;
+        this.totalOutput.innerHTML = ` <h2>Total : \$${this.totalAmount.toFixed(2)}</h2>`;
+
+    }
+
+    constructor(renderHookId)
+    {
+        super(renderHookId,false);
+        this.orderProducts = () =>{
+            console.log('ordering...');
+            console.log(this.items);
+        };
+        this.render();
+    }
+
+    addProduct(product)
+    {
+        const updatedItems = [...this.items]; 
+        updatedItems.push(product);
+        this.cartItems = updatedItems;
+    }
+
+    
+
     render() {
-        const cartEl = document.createElement('section');
+        
+        const cartEl = this.createRootElement('section','cart')
         cartEl.innerHTML = `
         <h2>Total : \$${0}</h2>
         <button> order now! </button>
         `;
-        cartEl.className = 'cart';
+        const orderButton = cartEl.querySelector('button');
+        // orderButton.addEventListener('click',() => this.orderProducts());
+        orderButton.addEventListener('click',this.orderProducts);
+        
         this.totalOutput = cartEl.querySelector('h2');
-        return cartEl;
     }
 
 };
 
-class ProductItem {
-    constructor(product)
+class ProductItem extends Component {
+    constructor(product,renderHookId)
     {
+        super(renderHookId,false);
         this.product = product;
+        this.render();
     }
 
     addToCart(){
@@ -48,8 +123,7 @@ class ProductItem {
     }
 
     render(){
-        const prodEl = document.createElement('li');
-            prodEl.className = 'product-item';
+        const prodEl = this.createRootElement('li','product-item');
             prodEl.innerHTML = `
             <div>
                 <img src = "${this.product.imageUrl}" alt = "${this.product.title}">
@@ -63,44 +137,55 @@ class ProductItem {
             `;
         const addCartButton = prodEl.querySelector('button');
         addCartButton.addEventListener('click',this.addToCart.bind(this));
-        return prodEl;
     }
 };
 
-class ProductList {
-    products = [
-        new Product('A Pillow','https://nymag.com/strategist/article/best-throw-pillows.html','A soft pillow', 2.33),
-        new Product('A Carpet', 'https://www.thespruce.com/overview-of-carpet-choices-1315092','A good quality carpet', 5.33)
-    ];
+class ProductList  extends Component {
+    
+    product = [];
 
-    constructor(){ }
+    constructor(renderHookId){ 
+        super(renderHookId);
+        this.fetchProducts();
+    }
+
+    fetchProducts(){
+        this.products = [
+            new Product('A Pillow','https://nymag.com/strategist/article/best-throw-pillows.html','A soft pillow', 2.33),
+            new Product('A Carpet', 'https://www.thespruce.com/overview-of-carpet-choices-1315092','A good quality carpet', 5.33)
+        ];
+
+        this.renderProducts();
+    }
+
+    renderProducts()
+    {
+        for(const prod of this.products)
+        {
+            new ProductItem(prod,'prod-list');
+        }
+    }
 
     render() {
         
-        const prodList = document.createElement('ul');
-        prodList.className = 'product-list';
-
-        for(const prod of this.products)
+        this.createRootElement('ul','product-list',[new ElementAttribute('id','prod-list')]);
+        if(this.products && this.products.length > 0)
         {
-            const productItem = new ProductItem(prod);
-            const prodEl = productItem.render();
-            prodList.append(prodEl);
+            this.renderProducts();
         }
-        return prodList;
-    }
 } 
+}
 
-class Shop{
+class Shop extends Component{
+
+    constructor()
+    {
+        super();
+    }
     render(){
-        const renderHook = document.getElementById('app');
 
-        this.cart = new ShoppingCart();
-        const cartEl = this.cart.render();
-        const productList = new ProductList();
-        const prodListEl = productList.render();
-
-        renderHook.append(cartEl);
-        renderHook.append(prodListEl);
+        this.cart = new ShoppingCart('app');
+         new ProductList('app');
     }
 }
 
@@ -109,7 +194,6 @@ class App {
 
     static init(){
         const shop = new Shop();
-        shop.render();
         this.cart = shop.cart;
            
     }
