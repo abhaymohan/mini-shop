@@ -147,10 +147,10 @@ class ProductList  extends Component {
     constructor(renderHookId){ 
         super(renderHookId,false);
         this.render();
-        this.fetchProducts();
+        this.#fetchProducts();
     }
 
-    fetchProducts(){
+    #fetchProducts(){
         this.#products = [
             new Product('A Pillow','https://nymag.com/strategist/article/best-throw-pillows.html','A soft pillow', 2.33),
             new Product('A Carpet', 'https://www.thespruce.com/overview-of-carpet-choices-1315092','A good quality carpet', 5.33)
@@ -206,3 +206,4 @@ class App {
 }
 
 App.init();
+
