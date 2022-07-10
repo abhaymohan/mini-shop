@@ -142,15 +142,16 @@ class ProductItem extends Component {
 
 class ProductList  extends Component {
     
-    product = [];
+    #products = [];
 
     constructor(renderHookId){ 
-        super(renderHookId);
+        super(renderHookId,false);
+        this.render();
         this.fetchProducts();
     }
 
     fetchProducts(){
-        this.products = [
+        this.#products = [
             new Product('A Pillow','https://nymag.com/strategist/article/best-throw-pillows.html','A soft pillow', 2.33),
             new Product('A Carpet', 'https://www.thespruce.com/overview-of-carpet-choices-1315092','A good quality carpet', 5.33)
         ];
@@ -160,7 +161,7 @@ class ProductList  extends Component {
 
     renderProducts()
     {
-        for(const prod of this.products)
+        for(const prod of this.#products)
         {
             new ProductItem(prod,'prod-list');
         }
@@ -169,7 +170,7 @@ class ProductList  extends Component {
     render() {
         
         this.createRootElement('ul','product-list',[new ElementAttribute('id','prod-list')]);
-        if(this.products && this.products.length > 0)
+        if(this.#products && this.#products.length > 0)
         {
             this.renderProducts();
         }
@@ -185,7 +186,7 @@ class Shop extends Component{
     render(){
 
         this.cart = new ShoppingCart('app');
-         new ProductList('app');
+        new ProductList('app');
     }
 }
 
